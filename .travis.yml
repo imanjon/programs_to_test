@@ -12,7 +12,8 @@ language: c
 compiler:
  - clang
  - gcc
-install: make get-deps
+# Esto creo que no lo voy a usar, y encima casca
+#install: make get-deps
 # Different versions for compilers
 matrix:
   include:

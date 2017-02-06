@@ -8,4 +8,4 @@ compiler:
 script:
  - mkdir build
  - cd build
- - cmake .. && make
+ - cmake ../program_sources && make

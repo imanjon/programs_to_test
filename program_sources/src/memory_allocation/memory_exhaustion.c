@@ -20,7 +20,6 @@ void f(void){
 
 void g(void){
 	malloc(2500);
-
 	f();
 }
 

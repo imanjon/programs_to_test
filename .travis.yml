@@ -5,6 +5,7 @@ before_install:
 install:
  - sudo apt-get -qq install --force-yes binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 p7zip-full
  - sudo apt-get -qq install --force-yes gcc-multilib
+ - sudo apt-get -qq install --force-yes valgrind
 # - sudo apt-get install gcc-5 g++-5
 addons:
   apt:

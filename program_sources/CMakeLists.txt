@@ -9,6 +9,11 @@ SET (APPLICATION_VERSION_MINOR 0)
 SET (APPLICATION_VERSION_PATCH 1)
 SET (APPLICATION_VERSION_STRING "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}-${APPLICATION_VERSION_TYPE}")
 
+# Optionally turn the colorful output to Makefile
+SET(CMAKE_COLOR_MAKEFILE ON)
+# And optionally
+SET(CMAKE_VERBOSE_MAKEFILE OFF)
+
 #
 # Project Output Paths
 #
@@ -104,69 +109,70 @@ IF(TESTING_USE_GTEST)
         # Debug flags
         SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wfatal-errors")
     else(GTEST_FOUND)
-        message(WARNING "GTEST is not installed. An alternative version for GTEST will be used instead")
+        # Download and unpack googletest at configure time
+        configure_file(${CMAKE_SOURCE_DIR}/tools/cmake/modules/thirdparty-gtest_git.cmake.in
+              googletest-download/CMakeLists.txt)
+        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+              WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+        execute_process(COMMAND ${CMAKE_COMMAND} --build .
+              WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
 
-	# We need thread support
-	find_package(Threads REQUIRED)
+        # Prevent GoogleTest from overriding our compiler/linker options
+        # when building with Visual Studio
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-	# Enable ExternalProject CMake module
-	include(ExternalProject)
+        # Add googletest directly to our build. This adds
+        # the following targets: gtest, gtest_main, gmock
+        # and gmock_main
+        add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
+              ${CMAKE_BINARY_DIR}/googletest-build)
+                            
+        # The gtest/gmock targets carry header search path
+        # dependencies automatically when using CMake 2.8.11 or
+        # later. Otherwise we have to add them here ourselves.
+        if (CMAKE_VERSION VERSION_LESS 2.8.11)
+              include_directories("${gtest_SOURCE_DIR}/include"
+              "${gmock_SOURCE_DIR}/include")
+        endif()
 
-	# Download and install GoogleTest;:
-	ExternalProject_Add(
-	    gtest
-	    URL https://googletest.googlecode.com/files/gtest-1.7.0.zip
-	    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
-            # Paso como argumentos de CMAKE el compilador, los flags y hago que compila las librerías shared
-            # Válido para todas las arquitecturas
-            CMAKE_ARGS -DCMAKE_C_COMPILER='${CMAKE_C_COMPILER}' -DCMAKE_C_FLAGS='${CMAKE_C_FLAGS}' -DCMAKE_CXX_COMPILER='${CMAKE_CXX_COMPILER}' -DCMAKE_CXX_FLAGS='${CMAKE_CXX_FLAGS}'-DBUILD_SHARED_LIBS=ON
-	    # Disable install step
-	    INSTALL_COMMAND ""
-	)
+        # Now simply link your own targets against gtest, gmock,
+        # etc. as appropriate
+        # Create a libgtest target to be used as a dependency by test programs
+        add_library(libgtest IMPORTED STATIC GLOBAL)
+        add_dependencies(libgtest gtest)
+        #add_library(libgtest_main IMPORTED STATIC GLOBAL)
+        #add_dependencies(libgtest_main gtest_main)
 
-	# Create a libgtest target to be used as a dependency by test programs
-	add_library(libgtest IMPORTED STATIC GLOBAL)
-	add_dependencies(libgtest gtest)
+        # Set gmock properties
+        #ExternalProject_Get_Property(gtest source_dir binary_dir)
+        set_target_properties(libgtest PROPERTIES
+              "IMPORTED_LOCATION" "${LIBRARY_OUTPUT_PATH}/libgtest.a"
+              "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
+              #"INTERFACE_INCLUDE_DIRECTORIES" "${source_dir}/include"
+        )
+        # I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
+        include_directories(BEFORE "${source_dir}/include")
 
-	# Set gmock properties
-	ExternalProject_Get_Property(gtest source_dir binary_dir)
-	set_target_properties(libgtest PROPERTIES
-	    "IMPORTED_LOCATION" "${binary_dir}/libgtest.a"
-	    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
-            #"INTERFACE_INCLUDE_DIRECTORIES" "${source_dir}/include"
-	)
-	# I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
-        include_directories("${source_dir}/include")
+        # Create a libgmock target to be used as a dependency by test programs
+        add_library(libgmock IMPORTED STATIC GLOBAL)
+        add_dependencies(libgmock gmock)
+        #add_library(libgmock_main IMPORTED STATIC GLOBAL)
+        #add_dependencies(libgmock_main gmock_main)
 
-	# Download and install GoogleMock
-	ExternalProject_Add(
-	    gmock
-	    URL https://googlemock.googlecode.com/files/gmock-1.7.0.zip
-	    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gmock
-            # Paso como argumentos de CMAKE el compilador, los flags y hago que compila las librerías shared
-            # Válido para todas las arquitecturas
-            CMAKE_ARGS -DCMAKE_C_COMPILER='${CMAKE_C_COMPILER}' -DCMAKE_C_FLAGS='${CMAKE_C_FLAGS}' -DCMAKE_CXX_COMPILER='${CMAKE_CXX_COMPILER}' -DCMAKE_CXX_FLAGS='${CMAKE_CXX_FLAGS}'-DBUILD_SHARED_LIBS=ON
-	    # Disable install step
-	    INSTALL_COMMAND ""
-	)
+        # Set gmock properties
+        #ExternalProject_Get_Property(gmock source_dir binary_dir)
+        set_target_properties(libgmock PROPERTIES
+              "IMPORTED_LOCATION" "${LIBRARY_OUTPUT_PATH}/libgmock.a"
+              "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
+              #"INTERFACE_INCLUDE_DIRECTORIES" "${source_dir}/include"
+        )
+        # I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
+        include_directories(BEFORE "${source_dir}/include")
 
-	# Create a libgmock target to be used as a dependency by test programs
-	add_library(libgmock IMPORTED STATIC GLOBAL)
-	add_dependencies(libgmock gmock)
-
-	# Set gmock properties
-	ExternalProject_Get_Property(gmock source_dir binary_dir)
-	set_target_properties(libgmock PROPERTIES
-	    "IMPORTED_LOCATION" "${binary_dir}/libgmock.a"
-	    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
-            #"INTERFACE_INCLUDE_DIRECTORIES" "${source_dir}/include"
-	)
-	# I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
-        include_directories("${source_dir}/include")
-
-        SET(GMOCK_LIBRARIES  libgmock)
-        SET(GTEST_LIBRARIES  libgtest)
+        SET(GMOCK_LIBRARIES  libgmock gmock_main)
+        SET(GTEST_LIBRARIES  libgtest gtest_main)
         SET(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES})
+
     endif(GTEST_FOUND)
     enable_testing ()
 ENDIF()
@@ -174,7 +180,7 @@ ENDIF()
 # Documentation Generation
 SET(DOXY_DOCUMENTATION_PATH ./doc CACHE  FILEPATH "Path where documentation will be loaded")
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${DOXY_DOCUMENTATION_PATH})
-OPTION(DOXY_INSTALL          "Set to OFF to skip build/install Documentation"            ON)
+OPTION(DOXY_INSTALL         "Set to OFF to skip build/install Documentation"            ON)
 OPTION(DOXY_DOT             "Set to ON to perform diagram generation with graphviz"     OFF)
 OPTION(DOXY_LATEX           "Set to ON to build latex documentation"                    OFF)
 OPTION(DOXY_CHM             "Set to ON to build CHM Windows documentation"              OFF)
@@ -270,4 +276,5 @@ message(STATUS "the value of MYVAR: " $ENV{MYVAR})
 execute_process(COMMAND "/usr/bin/env" OUTPUT_VARIABLE myEnvOut)
 string(REGEX MATCH "MYVAR=[^\n]*" MyVarEnv "${myEnvOut}")
 message(STATUS "Found MYVAR: ${MyVarEnv}")
+
 

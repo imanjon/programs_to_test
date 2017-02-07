@@ -5,6 +5,10 @@ before_install:
 install:
  - sudo apt-get -qq install --force-yes binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 p7zip-full
  - sudo apt-get -qq install --force-yes gcc-multilib
+ - sudo apt-get -qq install --force-yes gcc-4.7 g++-4.7
+ - sudo apt-get -qq install --force-yes gcc-4.8 g++-4.8
+ - sudo apt-get -qq install --force-yes gcc-4.9 g++-4.9
+ - sudo apt-get -qq install --force-yes gcc-5 g++-5
  - sudo apt-get -qq install --force-yes valgrind
 # - sudo apt-get install gcc-5 g++-5
 addons:
@@ -27,6 +31,10 @@ matrix:
   include:
     - env: CXX=/usr/bin/g++ CC=/usr/bin/gcc
     - env: CXX=/usr/bin/g++-4.6 CC=/usr/bin/gcc-4.6
+    - env: CXX=/usr/bin/g++-4.7 CC=/usr/bin/gcc-4.7
+    - env: CXX=/usr/bin/g++-4.8 CC=/usr/bin/gcc-4.8
+    - env: CXX=/usr/bin/g++-4.9 CC=/usr/bin/gcc-4.9
+    - env: CXX=/usr/bin/g++-5 CC=/usr/bin/gcc-5
 #    - env: CXX=g++-5 CC=gcc-5
 #    - env: CXX=g++-6 CC=gcc-6
 #    - env: CXX=clang++-3.8 CC=clang-3.8
@@ -35,6 +43,4 @@ matrix:
 script:
  - mkdir build
  - cd build
- - echo ${CC}
- - echo ${CXX}
  - cmake ../program_sources -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DTESTING_USE_GTEST=1 && make && make test

@@ -48,7 +48,7 @@ matrix:
             - gcc-5
             - cmake
             - cmake-data
-      env: COMPILER=g++-5 CXX=g++-5 CC=gcc-5
+      env: COMPILER=gcc-5 CXX=g++-5 CC=gcc-5
     - compiler: clang
       addons:
         apt:

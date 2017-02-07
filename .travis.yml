@@ -24,8 +24,4 @@ matrix:
 script:
  - mkdir build
  - cd build
- - echo $PATH
- - ls /usr/bin
- - ls /bin
- - cmake ../program_sources && make
-
+ - cmake ../program_sources -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX && make

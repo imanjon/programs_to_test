@@ -25,14 +25,16 @@ language: c
 # Different versions for compilers
 matrix:
   include:
-    - env: CXX=g++-4.6 CC=gcc-4.6
+    - env: CXX=/usr/bin/g++ CC=/usr/bin/gcc
+    - env: CXX=/usr/bin/g++-4.6 CC=/usr/bin/gcc-4.6
 #    - env: CXX=g++-5 CC=gcc-5
 #    - env: CXX=g++-6 CC=gcc-6
-    - env: CXX=clang++-3.8 CC=clang-3.8
+#    - env: CXX=clang++-3.8 CC=clang-3.8
+    - env: CXX=clang++ CC=clang
 # Build steps
 script:
  - mkdir build
  - cd build
  - echo ${CC}
  - echo ${CXX}
- - cmake ../program_sources -DCMAKE_C_COMPILER=/usr/bin/${CC} -DCMAKE_CXX_COMPILER=/usr/bin/${CXX} && make
+ - cmake ../program_sources -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} && make

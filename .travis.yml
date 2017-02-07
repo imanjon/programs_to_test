@@ -24,5 +24,8 @@ matrix:
 script:
  - mkdir build
  - cd build
+ - echo $PATH
+ - ls /usr/bin
+ - ls /bin
  - cmake ../program_sources && make
 

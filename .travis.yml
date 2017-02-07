@@ -37,4 +37,4 @@ script:
  - cd build
  - echo ${CC}
  - echo ${CXX}
- - cmake ../program_sources -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} && make
+ - cmake ../program_sources -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} && make && make test

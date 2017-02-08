@@ -1,10 +1,10 @@
 # I need these ones before working
 before_install:
    # - sudo dpkg --add-architecture i386
+ - sudo add-apt-repository ppa:george-edison55/precise-backports --yes
  - sudo apt-get update -qq
    # - test -n $CC  && unset CC
    # - test -n $CXX && unset CXX
- - sudo add-apt-repository ppa:george-edison55/precise-backports --yes
 install:
  - sudo apt-get -qq install --force-yes binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 p7zip-full
  - sudo apt-get -qq install --force-yes gcc-multilib

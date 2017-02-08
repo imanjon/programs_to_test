@@ -1,3 +1,16 @@
+notifications: # set notification options
+  email:
+    recipients:
+      - one@example.com
+      - other@example.com
+    on_success: change
+    on_failure: change
+# change is when the repo status goes from pass to fail or vice versa
+#   on_success: [always|never|change]
+#   on_failure: [always|never|change]
+# Or we could just disable all email
+# email: false
+
 # I need these ones before working
 before_install:
    # - sudo dpkg --add-architecture i386
@@ -7,7 +20,7 @@ before_install:
    # - test -n $CXX && unset CXX
 install:
  - sudo apt-get -qq install --force-yes binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 p7zip-full
- - sudo apt-get -qq install --force-yes gcc-multilib
+   # - sudo apt-get -qq install --force-yes gcc-multilib
  - sudo apt-get -qq install --force-yes valgrind
  - sudo apt-get -qq install --force-yes cmake cmake-data
 # - sudo apt-get install gcc-5 g++-5
@@ -41,7 +54,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-            - gcc-4.9
+            - gcc-4.9-multilib
       env: COMPILER=gcc-4.9 CXX=g++-4.9 CC=gcc-4.9
     - compiler: gcc
       os: linux
@@ -51,7 +64,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-            - gcc-5
+            - gcc-5-multilib
       env: COMPILER=gcc-5 CXX=g++-5 CC=gcc-5
     - compiler: clang
       os: linux

@@ -2,8 +2,8 @@
 before_install:
 # - sudo dpkg --add-architecture i386
  - sudo apt-get update -qq
- - test -n $CC  && unset CC
- - test -n $CXX && unset CXX
+   # - test -n $CC  && unset CC
+   # - test -n $CXX && unset CXX
 install:
  - sudo apt-get -qq install --force-yes binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 p7zip-full
  - sudo apt-get -qq install --force-yes gcc-multilib
@@ -16,7 +16,7 @@ addons:
     packages:
      - cmake
      - cmake-data
-# Enable C++ support
+# Enable C support
 language: c
 # Compiler selection
 #compiler:
@@ -28,6 +28,7 @@ language: c
 matrix:
   include:
     - compiler: gcc
+      os: linux
       addons:
         apt:
           sources:
@@ -38,8 +39,9 @@ matrix:
             - gcc-4.9
             - cmake
             - cmake-data
-      env: COMPILER=g++-4.9 CXX=g++-4.9 CC=gcc-4.9
+      env: COMPILER=g-4.9 CXX=g++-4.9 CC=gcc-4.9
     - compiler: gcc
+      os: linux
       addons:
         apt:
           sources:
@@ -52,6 +54,7 @@ matrix:
             - cmake-data
       env: COMPILER=gcc-5 CXX=g++-5 CC=gcc-5
     - compiler: clang
+      os: linux
       addons:
         apt:
           sources:
@@ -62,8 +65,9 @@ matrix:
             - clang-3.6
             - cmake
             - cmake-data
-      env: COMPILER=clang++-3.6 CXX=clang++-3.6 CC=clang-3.6
+      env: COMPILER=clang-3.6 CXX=clang++-3.6 CC=clang-3.6
     - compiler: clang
+      os: linux
       addons:
         apt:
           sources:
@@ -74,7 +78,7 @@ matrix:
             - clang-3.7
             - cmake
             - cmake-data
-      env: COMPILER=clang++-3.7 CXX=clang++-3.7 CC=clang-3.7
+      env: COMPILER=clang-3.7 CXX=clang++-3.7 CC=clang-3.7
 
 #    - env: CXX=/usr/bin/g++ CC=/usr/bin/gcc
 #    - env: CXX=/usr/bin/g++-4.6 CC=/usr/bin/gcc-4.6
@@ -90,4 +94,4 @@ matrix:
 script:
  - mkdir build
  - cd build
- - cmake ../program_sources -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DTESTING_USE_GTEST=1 && make && make test
+ - cmake ../program_sources CC=${COMPILER} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DTESTING_USE_GTEST=1 && make && make test

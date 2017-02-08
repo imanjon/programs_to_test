@@ -1,6 +1,6 @@
 # I need these ones before working
 before_install:
-# - sudo dpkg --add-architecture i386
+   # - sudo dpkg --add-architecture i386
  - sudo apt-get update -qq
    # - test -n $CC  && unset CC
    # - test -n $CXX && unset CXX
@@ -9,6 +9,10 @@ install:
  - sudo apt-get -qq install --force-yes gcc-multilib
  - sudo apt-get -qq install --force-yes valgrind
 # - sudo apt-get install gcc-5 g++-5
+before_script:
+ - echo "This message is shown BEFORE the script is launched"
+after_script:
+ - echo "This message is shown AFTER the script is launched"
 addons:
   apt:
     sources:
@@ -94,4 +98,5 @@ matrix:
 script:
  - mkdir build
  - cd build
- - cmake ../program_sources CC=${COMPILER} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DTESTING_USE_GTEST=1 && make && make test
+ - export CC=${COMPILER}
+ - cmake ../program_sources -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DTESTING_USE_GTEST=1 && make && make test

@@ -43,7 +43,7 @@ matrix:
             - gcc-4.9
             - cmake
             - cmake-data
-      env: COMPILER=g-4.9 CXX=g++-4.9 CC=gcc-4.9
+      env: COMPILER=gcc-4.9 CXX=g++-4.9 CC=gcc-4.9
     - compiler: gcc
       os: linux
       addons:

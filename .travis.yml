@@ -16,6 +16,7 @@ before_install:
    # - sudo dpkg --add-architecture i386
  - sudo add-apt-repository ppa:george-edison55/precise-backports --yes
  - sudo apt-get update -qq
+   # Borrado de variables de entorno que haya instaladas en el sistema
    # - test -n $CC  && unset CC
    # - test -n $CXX && unset CXX
 install:

@@ -1,8 +1,15 @@
 FILE(GLOB_RECURSE test_SRCS *.cpp *.cxx *.cc *.C *.c *.h *.hpp *.hxx)
 
-SET(GCC_PROFILE_FLAGS "-pg")
-SET(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
-SET(GCC_COVERAGE_LINK_FLAGS "-lgcov")
+IF (OPTION_PROFILING_FOR_TESTS) 
+    SET(GCC_PROFILING_ENABLED ON)
+    SET(GCC_PROFILE_FLAGS "-pg")
+ENDIF(OPTION_PROFILING_FOR_TESTS)
+
+IF (OPTION_COVERAGE_FOR_TESTS)
+    SET(GCC_COVERAGE ON)
+    SET(GCC_COVERAGE_COMPILE_FLAGS "-fprofile-arcs -ftest-coverage --coverage")
+    SET(GCC_COVERAGE_LINK_FLAGS "-lgcov")
+ENDIF(OPTION_COVERAGE_FOR_TESTS)
 
 SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-O0 -g -Wall -W -pg -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings ${GCC_COVERAGE_COMPILE_FLAGS} ${GCC_PROFILE_FLAGS}" )
 SET(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-O0 -g -Wall -W ${GCC_COVERAGE_COMPILE_FLAGS} ${GCC_PROFILE_FLAGS}")
@@ -39,27 +46,31 @@ ADD_TEST(NAME cunit-unittests-1 COMMAND ${test_BIN})
 ADD_TEST(NAME cunit-unittests-2 COMMAND ${test_BIN} -p foo)
 
 # Execute some commands to get coverage information after build
-ADD_CUSTOM_COMMAND(
-    TARGET ${test_BIN}
-    POST_BUILD
-    COMMAND ${test_BIN} 1>> /dev/null
-    COMMAND ${CMAKE_COMMAND} -E echo "Generating code coverage reports. This may take some time"
-    COMMAND lcov --base-directory . --directory . -c -o ${test_BIN}_test.info
-    COMMAND ${CMAKE_COMMAND} -E echo "Generating HTML files"
-    COMMAND genhtml -o ${CMAKE_BINARY_DIR}/cunit_test_coverage -t \"${test_BIN} test coverage\" --num-spaces 4 ${test_BIN}_test.info
-    WORKING_DIRECTORY "."
-    COMMENT "Code coverage reports"
-    #VERBATIM
-    )
+IF(GCC_COVERAGE_ENABLED)
+    ADD_CUSTOM_COMMAND(
+        TARGET ${test_BIN}
+        POST_BUILD
+        COMMAND ${test_BIN} 1>> /dev/null
+        COMMAND ${CMAKE_COMMAND} -E echo "Generating code coverage reports. This may take some time"
+        COMMAND lcov --base-directory . --directory . -c -o ${test_BIN}_test.info
+        COMMAND ${CMAKE_COMMAND} -E echo "Generating HTML files"
+        COMMAND genhtml -o ${CMAKE_BINARY_DIR}/cunit_test_coverage -t \"${test_BIN} test coverage\" --num-spaces 4 ${test_BIN}_test.info
+        WORKING_DIRECTORY "."
+        COMMENT "Code coverage reports"
+        #VERBATIM
+        )
+ENDIF(GCC_COVERAGE_ENABLED)
 
 # Execute some commands to get profiling information after build
-ADD_CUSTOM_COMMAND(
-    TARGET ${test_BIN}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Generating profiling reports"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/cunit_test_profiling
-    COMMAND gprof -a ${CMAKE_BINARY_DIR}/bin/${test_BIN} ${CMAKE_CURRENT_BINARY_DIR}/gmon.out > ${CMAKE_BINARY_DIR}/cunit_test_profiling/analysis.txt
-    WORKING_DIRECTORY "."
-    COMMENT "Profiling tools to generate reports"
-    )
-
+IF (GCC_PROFILING_ENABLED)
+    ADD_CUSTOM_COMMAND(
+        TARGET ${test_BIN}
+        POST_BUILD
+        COMMAND ${test_BIN} 1>> /dev/null
+        COMMAND ${CMAKE_COMMAND} -E echo "Generating profiling reports"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/cunit_test_profiling
+        COMMAND gprof -a ${CMAKE_BINARY_DIR}/bin/${test_BIN} ${CMAKE_CURRENT_BINARY_DIR}/gmon.out > ${CMAKE_BINARY_DIR}/cunit_test_profiling/analysis.txt
+        WORKING_DIRECTORY "."
+        COMMENT "Profiling tools to generate reports"
+        )
+ENDIF(GCC_PROFILING_ENABLED)

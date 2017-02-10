@@ -104,12 +104,12 @@ OPTION(TESTING_USE_CUNIT    "Set to ON to build testing executables with CUNIT" 
 IF(TESTING_USE_CUNIT)
     FIND_PACKAGE (CUnit)    #optional package, not REQUIRED
     if (CUNIT_FOUND)
-        message(WARNING "Tests are enabled and CUnit package was found")
+        message(STATUS "Tests are enabled and CUnit package was found")
     else(CUNIT_FOUND)
-        message(WARNING "Unit tests are not enabled because the CUNIT package was not found")
+        message(STATUS "Unit tests are not enabled because the CUNIT package was not found")
     endif(CUNIT_FOUND)
     enable_testing ()
-ENDIF()
+ENDIF(TESTING_USE_CUNIT)
 
 #
 # CTest for TESTING
@@ -118,7 +118,7 @@ OPTION(TESTING_USE_CTEST    "Set to ON to build testing executables with CTEST" 
 IF(TESTING_USE_CTEST)
 #    FIND_PACKAGE (CTest)    #optional package, not REQUIRED
 #    if (CTEST_FOUND)
-#        message(WARNING "Tests are enabled")
+#        message(STATUS "Tests are enabled")
 #        
 #        # Debug flags
 #        SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wfatal-errors")
@@ -126,7 +126,7 @@ IF(TESTING_USE_CTEST)
 #
 #    endif(CTEST_FOUND)
     enable_testing ()
-ENDIF()
+ENDIF(TESTING_USE_CTEST)
 
 #
 # GTest for TESTING
@@ -135,7 +135,7 @@ OPTION(TESTING_USE_GTEST    "Set to ON to build testing executables with GTEST" 
 IF(TESTING_USE_GTEST)
     FIND_PACKAGE (GTest)    #optional package, not REQUIRED
     if (GTEST_FOUND)
-        message(WARNING "Tests are enabled")
+        message(STATUS "Tests are enabled")
         
         # Debug flags
         SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wfatal-errors")
@@ -206,12 +206,16 @@ IF(TESTING_USE_GTEST)
 
     endif(GTEST_FOUND)
     enable_testing ()
-ENDIF()
+ENDIF(TESTING_USE_GTEST)
+
+# Covreage y profiling para los tests
+OPTION(OPTION_COVERAGE_FOR_TESTS          "Run coverage tools for all tests"            OFF)
+OPTION(OPTION_PROFILING_FOR_TESTS         "Run profiling tools for all tests"           OFF)
 
 # Documentation Generation
 SET(DOXY_DOCUMENTATION_PATH ./doc CACHE  FILEPATH "Path where documentation will be loaded")
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${DOXY_DOCUMENTATION_PATH})
-OPTION(DOXY_INSTALL         "Set to OFF to skip build/install Documentation"            ON)
+OPTION(DOXY_INSTALL         "Set to OFF to skip build/install Documentation"            OFF)
 OPTION(DOXY_DOT             "Set to ON to perform diagram generation with graphviz"     OFF)
 OPTION(DOXY_LATEX           "Set to ON to build latex documentation"                    OFF)
 OPTION(DOXY_CHM             "Set to ON to build CHM Windows documentation"              OFF)
@@ -295,7 +299,7 @@ IF (DOXY_INSTALL)
     #INCLUDE("${PROJECT_SOURCE_DIR}/generateDoc.cmake" )
     INCLUDE("generateDoc" )
     GENERATE_DOCUMENTATION(${PROJECT_SOURCE_DIR}/share/lib${PROJECT_NAME}.dox.in)
-ENDIF()
+ENDIF(DOXY_INSTALL)
 
 # Install the package
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/share/conf DESTINATION ${CMAKE_INSTALL_PREFIX}/share/conf/)

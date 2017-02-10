@@ -10,7 +10,16 @@ SET(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-O0 -g -Wall -W ${GCC_COVERAGE_COMPILE_FLAGS
 SET(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS})
 
 INCLUDE_DIRECTORIES(
+    # CUnit header directory
     ${CUNIT_INCLUDE_DIRS}
+    
+    # Project's main header directory
+    ${CMAKE_SOURCE_DIR}/inc
+
+    # Example library header directory, add as many as your project has
+    #${CMAKE_SOURCE_DIR}/inc
+
+    # Local test headers
     "inc"
 )
 
@@ -23,9 +32,34 @@ ADD_EXECUTABLE(${test_BIN} ${test_SRCS})
 TARGET_LINK_LIBRARIES(${test_BIN}
     ${test_LIBS}
     ${CUNIT_LIBRARIES}
-    #"gcov"
     ${LIBRARY_OUTPUT_PATH}/libHello.so)
 # Añado varios test poniendo el nombre del test y qué binario ejecutar y con qué argumentos
 # El test se considerará válido si devuelve >= 0
 ADD_TEST(NAME cunit-unittests-1 COMMAND ${test_BIN})
 ADD_TEST(NAME cunit-unittests-2 COMMAND ${test_BIN} -p foo)
+
+# Execute some commands to get coverage information after build
+ADD_CUSTOM_COMMAND(
+    TARGET ${test_BIN}
+    POST_BUILD
+    COMMAND ${test_BIN} 1>> /dev/null
+    COMMAND ${CMAKE_COMMAND} -E echo "Generating code coverage reports. This may take some time"
+    COMMAND lcov --base-directory . --directory . -c -o ${test_BIN}_test.info
+    COMMAND ${CMAKE_COMMAND} -E echo "Generating HTML files"
+    COMMAND genhtml -o ${CMAKE_BINARY_DIR}/cunit_test_coverage -t \"${test_BIN} test coverage\" --num-spaces 4 ${test_BIN}_test.info
+    WORKING_DIRECTORY "."
+    COMMENT "Code coverage reports"
+    #VERBATIM
+    )
+
+# Execute some commands to get profiling information after build
+ADD_CUSTOM_COMMAND(
+    TARGET ${test_BIN}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Generating profiling reports"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/cunit_test_profiling
+    COMMAND gprof -a ${CMAKE_BINARY_DIR}/bin/${test_BIN} ${CMAKE_CURRENT_BINARY_DIR}/gmon.out > ${CMAKE_BINARY_DIR}/cunit_test_profiling/analysis.txt
+    WORKING_DIRECTORY "."
+    COMMENT "Profiling tools to generate reports"
+    )
+

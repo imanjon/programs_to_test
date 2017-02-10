@@ -131,6 +131,23 @@ int main()
       return CU_get_error();
    }
 
+   /* add a suite to the registry */
+   pSuite = CU_add_suite("Suite_that_will_fail", NULL, NULL);
+   if (NULL == pSuite) {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
+   /* add the tests to the suite */
+   if ((NULL == CU_add_test(pSuite, "failed_test_1", test_failure1)) ||
+       (NULL == CU_add_test(pSuite, "failed_test_2", test_failure2)) ||
+       (NULL == CU_add_test(pSuite, "failed_test_3", test_failure3)) ||
+       (NULL == CU_add_test(pSuite, "failed_test_4", test_failure4)))
+   {
+      CU_cleanup_registry();
+      return CU_get_error();
+   }
+
    /* Run all tests using the basic interface */
    CU_basic_set_mode(CU_BRM_VERBOSE);
    CU_basic_run_tests();

@@ -70,9 +70,9 @@ elseif (BUILDING_ARCHITECTURE STREQUAL "MinGw")
         SET(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/tools/cmake/toolchain/Toolchain-cross-mingw32-linux.cmake)
         include(${CMAKE_TOOLCHAIN_FILE})
 else()
-    SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -W -Wno-return-type ")
+    SET(CMAKE_CXX_FLAGS_DEBUG "-g3 -Wall -W -Wno-return-type ")
     SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -pipe -march=core2 ")
-    SET(CMAKE_C_FLAGS_DEBUG "-O0 -g3 -Wall -W -Wno-return-type ")
+    SET(CMAKE_C_FLAGS_DEBUG "-g3 -Wall -W -Wno-return-type ")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -pipe -march=core2 ")
 endif()
 
@@ -98,9 +98,40 @@ SET(CMAKE_C_FLAGS_RELEASE "${MY_COMPILATION_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
 FIND_PACKAGE(PkgConfig) #Enable PKG-CONFIG suport
 
 #
+# CUnit for TESTING
+#
+OPTION(TESTING_USE_CUNIT    "Set to ON to build testing executables with CUNIT"         OFF)
+IF(TESTING_USE_CUNIT)
+    FIND_PACKAGE (CUnit)    #optional package, not REQUIRED
+    if (CUNIT_FOUND)
+        message(WARNING "Tests are enabled and CUnit package was found")
+    else(CUNIT_FOUND)
+        message(WARNING "Unit tests are not enabled because the CUNIT package was not found")
+    endif(CUNIT_FOUND)
+    enable_testing ()
+ENDIF()
+
+#
+# CTest for TESTING
+#
+OPTION(TESTING_USE_CTEST    "Set to ON to build testing executables with CTEST"         OFF)
+IF(TESTING_USE_CTEST)
+#    FIND_PACKAGE (CTest)    #optional package, not REQUIRED
+#    if (CTEST_FOUND)
+#        message(WARNING "Tests are enabled")
+#        
+#        # Debug flags
+#        SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wfatal-errors")
+#    else(CTEST_FOUND)
+#
+#    endif(CTEST_FOUND)
+    enable_testing ()
+ENDIF()
+
+#
 # GTest for TESTING
 #
-OPTION(TESTING_USE_GTEST    "Set to ON to build testing executables"                    OFF)
+OPTION(TESTING_USE_GTEST    "Set to ON to build testing executables with GTEST"         OFF)
 IF(TESTING_USE_GTEST)
     FIND_PACKAGE (GTest)    #optional package, not REQUIRED
     if (GTEST_FOUND)
@@ -250,8 +281,14 @@ PKG_CHECK_MODULES(ZLIB  zlib>=1.0.0 REQUIRED)
 ADD_SUBDIRECTORY(libs)
 ADD_SUBDIRECTORY(src)
 IF (TESTING_USE_GTEST)
-    ADD_SUBDIRECTORY(test)
+    ADD_SUBDIRECTORY(test/gtest)
 ENDIF(TESTING_USE_GTEST)
+IF (TESTING_USE_CTEST)
+    ADD_SUBDIRECTORY(test/ctest)
+ENDIF(TESTING_USE_CTEST)
+IF (TESTING_USE_CUNIT)
+    ADD_SUBDIRECTORY(test/cunit)
+ENDIF(TESTING_USE_CUNIT)
 
 # Documentation installation 
 IF (DOXY_INSTALL)

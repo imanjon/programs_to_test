@@ -1,4 +1,4 @@
-PROJECT(HELLO)
+PROJECT(SubProjectExample)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 SET (APPLICATION_NAME "MyHelloApplication")
@@ -100,15 +100,17 @@ FIND_PACKAGE(PkgConfig) #Enable PKG-CONFIG suport
 #
 # CUnit for TESTING
 #
+
 OPTION(TESTING_USE_CUNIT    "Set to ON to build testing executables with CUNIT"         OFF)
 IF(TESTING_USE_CUNIT)
-    FIND_PACKAGE (CUnit)    #optional package, not REQUIRED
+    FIND_PACKAGE (CUnit REQUIRED)    #optional package, not REQUIRED
     if (CUNIT_FOUND)
         message(STATUS "Tests are enabled and CUnit package was found")
+        enable_testing ()
     else(CUNIT_FOUND)
-        message(STATUS "Unit tests are not enabled because the CUNIT package was not found")
+        message(SEND_ERROR "Unit tests are NOT enabled because the CUNIT package was not found")
+        SET(TESTING_USE_CUNIT OFF)
     endif(CUNIT_FOUND)
-    enable_testing ()
 ENDIF(TESTING_USE_CUNIT)
 
 #
@@ -116,16 +118,20 @@ ENDIF(TESTING_USE_CUNIT)
 #
 OPTION(TESTING_USE_CTEST    "Set to ON to build testing executables with CTEST"         OFF)
 IF(TESTING_USE_CTEST)
-#    FIND_PACKAGE (CTest)    #optional package, not REQUIRED
-#    if (CTEST_FOUND)
-#        message(STATUS "Tests are enabled")
-#        
-#        # Debug flags
-#        SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wfatal-errors")
-#    else(CTEST_FOUND)
-#
-#    endif(CTEST_FOUND)
-    enable_testing ()
+    #    FIND_PACKAGE (CTest REQUIRED)    #optional package, not REQUIRED
+    SET(CTEST_FOUND "YES")
+    if (CTEST_FOUND)
+        message(STATUS "Tests are enabled")
+
+        # Debug flags
+        ##        SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wfatal-errors")
+        enable_testing ()
+        include(CTest)
+
+    else(CTEST_FOUND)
+        #message(SEND_ERROR "Unit tests are not enabled because the CTEST package was not found")
+        #SET(TESTING_USE_CTEST OFF)
+    endif(CTEST_FOUND)
 ENDIF(TESTING_USE_CTEST)
 
 #
